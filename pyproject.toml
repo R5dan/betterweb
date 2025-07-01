@@ -1,0 +1,20 @@
+[project]
+name = "betterweb"
+version = "0.1.0"
+description = "A simple web framework for Python."
+readme = "README.md"
+authors = [
+    { name = "R5dan", email = "r5dan@outlook.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "msgspec>=0.19.0",
+    "uvicorn[standard]>=0.35.0",
+]
+
+[project.scripts]
+betterweb = "betterweb:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

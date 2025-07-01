@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"target": "ES2019", // Or "ESNext" for the latest features, or "ES2015" for broader compatibility
+		"module": "ESNext", // Crucial change: Output ES Modules
+		"outDir": "./dist", // Where your compiled JS files will go
+		"esModuleInterop": true, // Often helpful for compatibility with CJS libraries
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+	},
+	"include": [
+		"src/**/*.ts" // Or wherever your client-side TS files are
+	],
+	"exclude": ["node_modules"]
+}
