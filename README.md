@@ -11,8 +11,8 @@ uv add betterweb
 
 ## Example
 
-[!NOTE]
-See the [example](https://github.com/r5dan/BetterWeb/blob/main/example.py) for a more complete example.
+> [!NOTE]
+> See the [example](https://github.com/r5dan/BetterWeb/blob/main/example.py) for a more complete example.
 
 ```python
 from betterweb import (
