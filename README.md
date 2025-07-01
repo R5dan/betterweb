@@ -50,8 +50,10 @@ async def stream(request: Request, response: ResponseConstructor):
 
 
 async def onclick():
-    await Console.log("Clicked")
+    await Console.log("Clicked") # Logs it to the client only, to see check the browser console
     print("Clicked")
+
+# See [#Routes] for more information
 
 async def page():
     async def client():
@@ -59,7 +61,7 @@ async def page():
         return DOM.create("div", {}, [
             DOM.create("h1", {}, ["Hello World"]),
             DOM.create("button", {
-                "onclick": onclick
+                "onclick": onclick # A python function that will be called when the button is clicked
             }, ["Click Me"]),
         ])
 
@@ -178,6 +180,19 @@ Creates a new instance of the `Route` class.
 
 - `path`: The path of the route.
 - `handler`: The handler function for the route.
+
+The handler function should return an async function
+The returned function is called the client function
+The handler function is called the server function
+
+The client function should return a DOM node
+It will be called whenever the state changes
+Client APIs like `Console` can only be called from the client function
+
+The server function should return the client function
+It will be called exactly once before any response is sent
+Client APIs like `Console` can not be called from the server function as the response has not been sent yet
+
 
 ### DOM
 
