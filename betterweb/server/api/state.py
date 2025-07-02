@@ -33,24 +33,31 @@ class State(t.Generic[T, I]):
         self.new = data
         self.ws.schedule_render()
 
-class Effect:
-    states: 'dict[str, Effect]' = {}
-    def __init__(self, func: t.Callable[[], None], deps: list[t.Any]):
+class Memo:
+    states: 'dict[str, Memo]' = {}
+    def __init__(self, func: t.Callable[[], None | t.Callable[[], None]], deps: list[t.Any]):
         self.func = func
         self.deps = deps
-        self.func()
+        self.cleanup = None
+        self.run()
     
+    def run(self):
+        if self.cleanup is not None:
+            self.cleanup()
+        
+        self.cleanup = self.func()
+
     @classmethod
     def create(cls, func: t.Callable[[], None], deps: list[t.Any]):
         if func.__name__ in cls.states:
             effect = cls.states[func.__name__]
             if effect.deps != deps:
                 effect.deps = deps
-                effect.func()
+                effect.run()
 
             return effect
         else:
-            effect = Effect(func, deps)
+            effect = cls(func, deps)
             cls.states[func.__name__] = effect
             return effect
 
@@ -63,11 +70,11 @@ def use_state[T, I](name, initial: I | t.Callable[[], I]=None) -> t.Tuple[T|I, t
 
     return state.data, state.dispatch
 
-def use_effect(func: t.Callable[[], None], deps: list[t.Any] = None):
+def use_memo(func: t.Callable[[], None], deps: list[t.Any] = None):
     if deps is None:
         deps = []
 
-    e = Effect.create(func, deps)
+    e = Memo.create(func, deps)
 
     if e.deps != deps:
         e.deps = deps
