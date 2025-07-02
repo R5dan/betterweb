@@ -9,6 +9,10 @@ pip install betterweb
 uv add betterweb
 ```
 
+## Diagram
+
+![Better Web Excalidraw](https://github.com/user-attachments/assets/818f0696-3152-4a63-82a4-84be16a61d35)
+
 ## Limitations
 
 - Only SSR, no logic is executed on the client
@@ -22,6 +26,7 @@ uv add betterweb
 
 > [!NOTE]
 > See the [example](https://github.com/r5dan/BetterWeb/blob/main/example.py) for a more complete example.
+![Uploading Better Web Excalidraw.svg…]()
 
 ```python
 from betterweb import (
