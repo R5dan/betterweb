@@ -10,7 +10,7 @@ from betterweb import (
     StaticRoute,
     Request,
     use_state,
-    use_effect,
+    use_memo,
 )
 import time
 import asyncio
@@ -43,7 +43,7 @@ async def page():
             time.sleep(10)
 
         count, setCount = use_state("counter", 0)
-        use_effect(complex_func, [count])
+        use_memo(complex_func, [count])
         return DOM.create(
             "div",
             {},
