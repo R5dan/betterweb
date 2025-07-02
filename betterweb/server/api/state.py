@@ -4,8 +4,9 @@ import typing as t
 T = t.TypeVar("T")
 I = t.TypeVar("I")
 
+
 class State(t.Generic[T, I]):
-    states: 'dict[str, State]' = {}
+    states: "dict[str, State]" = {}
 
     def __init__(self, initial: I):
         self.data = initial
@@ -33,22 +34,28 @@ class State(t.Generic[T, I]):
         self.new = data
         self.ws.schedule_render()
 
+
 class Memo:
-    states: 'dict[str, Memo]' = {}
-    def __init__(self, func: t.Callable[[], None | t.Callable[[], None]], deps: list[t.Any]):
+    states: "dict[str, Memo]" = {}
+
+    def __init__(
+        self, func: t.Callable[[], None | t.Callable[[], None]], deps: list[t.Any]
+    ):
         self.func = func
         self.deps = deps
         self.cleanup = None
         self.run()
-    
+
     def run(self):
         if self.cleanup is not None:
             self.cleanup()
-        
+
         self.cleanup = self.func()
 
     @classmethod
-    def create(cls, func: t.Callable[[], None | t.Callable[[],None]], deps: list[t.Any]):
+    def create(
+        cls, func: t.Callable[[], None | t.Callable[[], None]], deps: list[t.Any]
+    ):
         if func.__name__ in cls.states:
             effect = cls.states[func.__name__]
             if effect.deps != deps:
@@ -61,7 +68,22 @@ class Memo:
             cls.states[func.__name__] = effect
             return effect
 
-def use_state[T, I](name, initial: I | t.Callable[[], I]=None) -> t.Tuple[T|I, t.Callable[[T], None]]:
+
+def use_state[
+    T, I
+](name, initial: I | t.Callable[[], I] = None) -> tuple[T | I, t.Callable[[T], None]]:
+    """
+    Creates a stateful value.
+
+    - `name`: The name of the state. Has no  effect on the state, but is used to identify it.
+    - `initial`: The initial value of the state.
+
+    Returns:
+
+    - tuple[T | I, Callable[[T], None]]
+        - The stateful value
+        - A function to dispatch a new value to the state, causing a rerender
+    """
     if callable(initial):
         i = initial()
     else:
@@ -70,7 +92,24 @@ def use_state[T, I](name, initial: I | t.Callable[[], I]=None) -> t.Tuple[T|I, t
 
     return state.data, state.dispatch
 
-def use_memo(func: t.Callable[[], None|t.Callable[[], None]], deps: t.Optional[list[t.Any]] = None):
+
+def use_memo(
+    func: t.Callable[[], None | t.Callable[[], None]],
+    deps: t.Optional[list[t.Any]] = None,
+):
+    """
+    Creates a memoized value.
+    Is run when the dependencies change.
+
+    - `func`: The function to memoize. The name must be unique.
+    - `deps`: The dependencies of the memoized value. Optional: defaults to an empty list.
+
+    Returns:
+
+    - None
+    - Cleanup function - Called immediately before the next render
+    """
+
     if deps is None:
         deps = []
 

@@ -1,6 +1,6 @@
 // @ts-expect-error ZOD is installed as a module
-// import { z } from "https://unpkg.com/zod@3.25.67/v3/index.js";
-import {z} from "zod"
+import { z } from "https://unpkg.com/zod@3.25.67/v3/index.js";
+// import {z} from "zod"
 
 const socket = new WebSocket("ws://localhost:8000/__bw/ws");
 
@@ -128,4 +128,5 @@ socket.onopen = () => {
 	);
 };
 
+// @ts-expect-error Assigning value
 window.socket = socket;

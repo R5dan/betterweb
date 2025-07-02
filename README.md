@@ -253,7 +253,7 @@ Creates a stateful value.
 Creates a memoized value.
 Is run when the dependencies change.
 
--   `func`: The function to memoize.
+-   `func`: The function to memoize. The name must be unique.
 -   `deps`: The dependencies of the memoized value. Optional: defaults to an empty list.
 
 Returns:
