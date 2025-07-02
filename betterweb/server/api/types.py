@@ -17,8 +17,7 @@ from uvicorn._types import (
     LifespanScope,
 )
 import typing as t
-from starlette.requests import Request
-
+from .request import Request
 
 class OPTIONS(t.TypedDict):
     status: int

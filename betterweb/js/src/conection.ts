@@ -1,5 +1,6 @@
 // @ts-expect-error ZOD is installed as a module
-import { z } from "https://unpkg.com/zod@3.25.67/v3/index.js";
+// import { z } from "https://unpkg.com/zod@3.25.67/v3/index.js";
+import {z} from "zod"
 
 const socket = new WebSocket("ws://localhost:8000/__bw/ws");
 
@@ -80,6 +81,32 @@ processes.add({
 	data: z.string(),
 	function: (data) => document.body.innerHTML = data,
 });
+
+processes.add({
+	type: "ls",
+	data: z.union([
+		z.object({
+			type: z.literal("get")
+		}),
+		z.object({
+			type: z.literal("set"),
+			data: z.object({
+				key: z.string(),
+				value: z.string()
+			})
+		})
+	]),
+	function: (data) => {
+		if (data.type === "get") {
+			socket.send(JSON.stringify({
+				type: "ls-receive",
+				data: localStorage
+			}))
+		} else if (data.type === "set") {
+			localStorage.setItem(data.data.key, data.data.value)
+		}
+	}
+})
 
 socket.onmessage = async (event) => {
 	const json = JSON.parse(await (event.data as Blob).text());

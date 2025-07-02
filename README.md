@@ -25,8 +25,10 @@ from betterweb import (
     Console,
     DOM,
     StaticRoute,
+    Request,
+    use_state,
+    use_effect,
 )
-from starlette.requests import Request
 import time
 import asyncio
 
@@ -49,21 +51,34 @@ async def stream(request: Request, response: ResponseConstructor):
     await stream.close()
 
 
-async def onclick():
-    await Console.log("Clicked") # Logs it to the client only, to see check the browser console
-    print("Clicked")
-
-# See [#Routes] for more information
-
 async def page():
     async def client():
         await Console.log("Hello World")
-        return DOM.create("div", {}, [
-            DOM.create("h1", {}, ["Hello World"]),
-            DOM.create("button", {
-                "onclick": onclick # A python function that will be called when the button is clicked
-            }, ["Click Me"]),
-        ])
+
+        def complex_func():
+            print("COMPLEX")
+            time.sleep(10)
+
+        count, setCount = use_state("counter", 0)
+        use_effect(complex_func, [count])
+        return DOM.create(
+            "div",
+            {},
+            [
+                DOM.create(
+                    "h1",
+                    {},
+                    [
+                        f"Counter: {count}",
+                        DOM.create(
+                            "button",
+                            {"onclick": lambda: setCount(count + 1)},
+                            ["Click Me"],
+                        ),
+                    ],
+                ),
+            ],
+        )
 
     return client
 
@@ -86,7 +101,7 @@ app = App(
     websocket_routes={"/ws": WSRoute("/ws", ws)},
     routes={"/": Route("/", page)},
     static_routes={
-        "/static": StaticRoute.from_file("static/index.html", "text/html")
+        #        "/static": StaticRoute.from_file("static/index.html", "text/html")
     },
 )
 
@@ -103,19 +118,19 @@ The `App` class is the main class of the `betterweb` package. It is used to crea
 
 Creates a new instance of the `App` class.
 
-- `api_routes`: A dictionary of API routes. The key is the route path, and the value is an `APIRoute` object.
-- `websocket_routes`: A dictionary of websocket routes. The key is the route path, and the value is a `WSRoute` object.
-- `routes`: A dictionary of routes. The key is the route path, and the value is a `Route` object.
-- `static_routes`: A dictionary of static routes. The key is the route path, and the value is a `StaticRoute` object.
-- `on_startup`: A function to be called when the app starts.
-- `on_shutdown`: A function to be called when the app stops.
+-   `api_routes`: A dictionary of API routes. The key is the route path, and the value is an `APIRoute` object.
+-   `websocket_routes`: A dictionary of websocket routes. The key is the route path, and the value is a `WSRoute` object.
+-   `routes`: A dictionary of routes. The key is the route path, and the value is a `Route` object.
+-   `static_routes`: A dictionary of static routes. The key is the route path, and the value is a `StaticRoute` object.
+-   `on_startup`: A function to be called when the app starts.
+-   `on_shutdown`: A function to be called when the app stops.
 
 #### `run(host: str = "127.0.0.1", port: int = 8000)`
 
 Runs the app.
 
-- `host`: The host to run the app on.
-- `port`: The port to run the app on.
+-   `host`: The host to run the app on.
+-   `port`: The port to run the app on.
 
 ### APIRoute
 
@@ -125,9 +140,9 @@ The `APIRoute` class is used to define an API route.
 
 Creates a new instance of the `APIRoute` class.
 
-- `path`: The path of the route.
-- `methods`: A list of HTTP methods that the route supports.
-- `handler`: The handler function for the route. Should return `None` but accept a `Request` and `ResponseConstructor` object.
+-   `path`: The path of the route.
+-   `methods`: A list of HTTP methods that the route supports.
+-   `handler`: The handler function for the route. Should return `None` but accept a `Request` and `ResponseConstructor` object.
 
 ### ResponseConstructor
 
@@ -137,8 +152,8 @@ The `ResponseConstructor` class is used to construct a response.
 
 Creates a new instance of the `ResponseConstructor` class.
 
-- `body`: The body of the response.
-- `options`: The options of the response.
+-   `body`: The body of the response.
+-   `options`: The options of the response.
 
 #### `ResponseConstructor.error()`
 
@@ -166,9 +181,9 @@ The `WSRoute` class is used to define a websocket route.
 
 Creates a new instance of the `WSRoute` class.
 
-- `path`: The path of the route.
-- `handler`: The handler function for the route.
-- `close`: Whether to close the websocket connection after the handler function is called.
+-   `path`: The path of the route.
+-   `handler`: The handler function for the route.
+-   `close`: Whether to close the websocket connection after the handler function is called.
 
 ### Route
 
@@ -178,8 +193,8 @@ The `Route` class is used to define a route.
 
 Creates a new instance of the `Route` class.
 
-- `path`: The path of the route.
-- `handler`: The handler function for the route.
+-   `path`: The path of the route.
+-   `handler`: The handler function for the route.
 
 The handler function should return an async function
 The returned function is called the client function
@@ -193,7 +208,6 @@ The server function should return the client function
 It will be called exactly once before any response is sent
 Client APIs like `Console` can not be called from the server function as the response has not been sent yet
 
-
 ### DOM
 
 The `DOM` class is used to create DOM nodes.
@@ -202,9 +216,9 @@ The `DOM` class is used to create DOM nodes.
 
 Creates a new DOM node.
 
-- `tag`: The tag of the DOM node.
-- `properies`: The properties of the DOM node.
-- `children`: The children of the DOM node.
+-   `tag`: The tag of the DOM node.
+-   `properies`: The properties of the DOM node.
+-   `children`: The children of the DOM node.
 
 ### StaticRoute
 
@@ -214,13 +228,13 @@ The `StaticRoute` class is used to define a static route.
 
 Creates a new instance of the `StaticRoute` class.
 
-- `path`: The path of the route.
-- `data`: The data of the route.
-- `mime`: The MIME type of the route.
+-   `path`: The path of the route.
+-   `data`: The data of the route.
+-   `mime`: The MIME type of the route.
 
 #### `StaticRoute.from_file(path: str, mime: str)`
 
 Creates a new instance of the `StaticRoute` class from a file.
 
-- `path`: The path of the file.
-- `mime`: The MIME type of the file.
+-   `path`: The path of the file.
+-   `mime`: The MIME type of the file.

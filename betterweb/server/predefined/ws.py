@@ -27,23 +27,32 @@ class ConsoleSchema(t.TypedDict):
     message: str
 
 
-class Console:
+class Console(t.TypedDict):
     type: t.Literal["console"]
     data: ConsoleSchema
 
 
-class ConsoleClear:
+class ConsoleClear(t.TypedDict):
     type: t.Literal["console-clear"]
     data: None
 
 
-class HTML:
+class HTML(t.TypedDict):
     type: t.Literal["html"]
     data: str
 
 
-PROCESSES = t.Union[Console, ConsoleClear, HTML]
+class LocalStorageType(t.TypedDict, t.Generic[T]):
+    type: T
 
+class LocalStorageSet(LocalStorageType[t.Literal["set"]]):
+    data: dict[str, str]
+
+class LocalStorage(t.TypedDict):
+    type: t.Literal["ls"]
+    data: t.Union[LocalStorageType[t.Literal["get"]], LocalStorageSet]
+
+PROCESSES = t.Union[Console, ConsoleClear, HTML, LocalStorage]
 
 class WebsocketHandler:
     websocket: Websocket = None
@@ -72,7 +81,6 @@ class WebsocketHandler:
             cls.hash = data["hash"]
         elif msg["text"]:
             data = ms.json.decode(msg["text"])
-            print("DATA", data)
             cls.loc = data["data"]["url"]
             cls.query = dict(data["data"]["query"])
             cls.hash = data["data"]["hash"]
@@ -92,9 +100,7 @@ class WebsocketHandler:
                 cls.dirty = False
 
             msg = await cls.websocket.receive()
-            print(f"MSG: {msg}")
             data = ms.json.decode(msg["text"])
-            print(f"DATA: {data}")
 
             handler = DOM.events[data["data"]["id"]][data["data"]["event"]]
             if io.iscoroutinefunction(handler):
@@ -103,5 +109,13 @@ class WebsocketHandler:
                 handler()
 
     @classmethod
+    def schedule_render(cls):
+        cls.dirty = True
+
+    @classmethod
     async def send(cls, data: PROCESSES):
         await cls.websocket.sendBytes(ms.json.encode(data))
+
+    @classmethod
+    async def receive(cls):
+        return await cls.websocket.receive()

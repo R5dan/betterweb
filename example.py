@@ -8,8 +8,10 @@ from betterweb import (
     Console,
     DOM,
     StaticRoute,
+    Request,
+    use_state,
+    use_effect,
 )
-from starlette.requests import Request
 import time
 import asyncio
 
@@ -32,19 +34,34 @@ async def stream(request: Request, response: ResponseConstructor):
     await stream.close()
 
 
-async def onclick():
-    await Console.log("Clicked")
-    print("Clicked")
-
 async def page():
     async def client():
         await Console.log("Hello World")
-        return DOM.create("div", {}, [
-            DOM.create("h1", {}, ["Hello World"]),
-            DOM.create("button", {
-                "onclick": onclick
-            }, ["Click Me"]),
-        ])
+
+        def complex_func():
+            print("COMPLEX")
+            time.sleep(10)
+
+        count, setCount = use_state("counter", 0)
+        use_effect(complex_func, [count])
+        return DOM.create(
+            "div",
+            {},
+            [
+                DOM.create(
+                    "h1",
+                    {},
+                    [
+                        f"Counter: {count}",
+                        DOM.create(
+                            "button",
+                            {"onclick": lambda: setCount(count + 1)},
+                            ["Click Me"],
+                        ),
+                    ],
+                ),
+            ],
+        )
 
     return client
 
@@ -67,7 +84,7 @@ app = App(
     websocket_routes={"/ws": WSRoute("/ws", ws)},
     routes={"/": Route("/", page)},
     static_routes={
-        "/static": StaticRoute.from_file("static/index.html", "text/html")
+        #        "/static": StaticRoute.from_file("static/index.html", "text/html")
     },
 )
 

@@ -2,7 +2,6 @@ import uvicorn
 from uvicorn._types import Scope, ASGIReceiveCallable, ASGISendCallable
 import typing as t
 from .api import APIRoute, WSRoute, Route, StaticRoute
-from starlette.requests import Request
 from .predefined.ws import WebsocketHandler
 
 def read(path: str):
@@ -73,7 +72,6 @@ class App:
                 await self.api_routes[scope["path"]](request, send)
                 return
             elif scope["path"] in self.static_routes:
-                print(f"Handling static route: {scope['path']}")
                 await self.static_routes[scope["path"]](scope, receive, send)
             else:
                 await send(

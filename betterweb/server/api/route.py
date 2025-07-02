@@ -43,6 +43,11 @@ class APIRoute:
 
         await self.handler(request, response)
 
+T = t.TypeVar("T")
+
+class Receive(t.TypedDict):
+    bytes: t.Optional[bytes]
+    text: t.Optional[str]
 
 class Websocket:
     def __init__(self, send: websocketSendType, receive: websocketReceiveType):
@@ -88,7 +93,7 @@ class Websocket:
     async def close(self, code: int = 1000, reason: t.Optional[str] = None):
         await self._send({"type": "websocket.close", "code": code, "reason": reason})
 
-    async def receive(self):
+    async def receive(self) -> 'Receive':
         while True:
             msg = await self._receive()
             if msg["type"] == "websocket.receive":
