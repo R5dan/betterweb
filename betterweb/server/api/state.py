@@ -48,7 +48,7 @@ class Memo:
         self.cleanup = self.func()
 
     @classmethod
-    def create(cls, func: t.Callable[[], None], deps: list[t.Any]):
+    def create(cls, func: t.Callable[[], None | t.Callable[[],None]], deps: list[t.Any]):
         if func.__name__ in cls.states:
             effect = cls.states[func.__name__]
             if effect.deps != deps:
@@ -70,7 +70,7 @@ def use_state[T, I](name, initial: I | t.Callable[[], I]=None) -> t.Tuple[T|I, t
 
     return state.data, state.dispatch
 
-def use_memo(func: t.Callable[[], None], deps: list[t.Any] = None):
+def use_memo(func: t.Callable[[], None|t.Callable[[], None]], deps: t.Optional[list[t.Any]] = None):
     if deps is None:
         deps = []
 

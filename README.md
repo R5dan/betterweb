@@ -238,3 +238,25 @@ Creates a new instance of the `StaticRoute` class from a file.
 
 -   `path`: The path of the file.
 -   `mime`: The MIME type of the file.
+
+### State
+
+#### `use_state(name: str, initial: T | Callable[[], T] = None) -> Tuple[T, Callable[[T], None]]`
+
+Creates a stateful value.
+
+-   `name`: The name of the state. Has no  effect on the state, but is used to identify it.
+-   `initial`: The initial value of the state.
+
+#### `use_memo(func: Callable[[], None | Callable[[], None]], deps: list[Any] = None)`
+
+Creates a memoized value.
+Is run when the dependencies change.
+
+-   `func`: The function to memoize.
+-   `deps`: The dependencies of the memoized value. Optional: defaults to an empty list.
+
+Returns:
+
+- None
+- Cleanup function - Called immediately before the next render
