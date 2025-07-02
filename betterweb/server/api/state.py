@@ -70,8 +70,8 @@ class Memo:
 
 
 def use_state[
-    T, I
-](name, initial: I | t.Callable[[], I] = None) -> tuple[T | I, t.Callable[[T], None]]:
+    T
+](name, initial: T | t.Callable[[], T] = None) -> tuple[T | T, t.Callable[[T], None]]:
     """
     Creates a stateful value.
 
@@ -88,7 +88,7 @@ def use_state[
         i = initial()
     else:
         i = initial
-    state: State[T, I] = State.create(name, i)
+    state: State[T, T] = State.create(name, i)
 
     return state.data, state.dispatch
 

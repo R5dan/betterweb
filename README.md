@@ -9,6 +9,15 @@ pip install betterweb
 uv add betterweb
 ```
 
+## Limitations
+
+- Only SSR, no logic is executed on the client
+- No routing
+- Only can edit the children of the `<body>` tag in a normal route. No changing the `<head>` or `<html>` tag
+- For non-static routes, the server must always be running
+- 99% async
+- Currently no dev mode / hot reload
+
 ## Example
 
 > [!NOTE]
