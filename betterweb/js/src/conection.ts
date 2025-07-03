@@ -79,34 +79,61 @@ processes.add({
 processes.add({
 	type: "html",
 	data: z.string(),
-	function: (data) => document.body.innerHTML = data,
+	function: (data) => (document.body.innerHTML = data),
 });
 
 processes.add({
 	type: "ls",
 	data: z.union([
 		z.object({
-			type: z.literal("get")
+			type: z.literal("get"),
 		}),
 		z.object({
 			type: z.literal("set"),
 			data: z.object({
 				key: z.string(),
-				value: z.string()
-			})
-		})
+				value: z.string(),
+			}),
+		}),
 	]),
 	function: (data) => {
 		if (data.type === "get") {
-			socket.send(JSON.stringify({
-				type: "ls-receive",
-				data: localStorage
-			}))
+			socket.send(
+				JSON.stringify({
+					type: "ls-receive",
+					data: localStorage,
+				})
+			);
 		} else if (data.type === "set") {
-			localStorage.setItem(data.data.key, data.data.value)
+			localStorage.setItem(data.data.key, data.data.value);
 		}
+	},
+});
+
+processes.add({
+	type: "router",
+	data: z.union([
+		z.object({ type: z.literal("push"), url: z.string() }),
+		z.object({ type: z.literal("replace"), url: z.string() }),
+		z.object({ type: z.literal("reload") }),
+		z.object({ type: z.literal("back"), }),
+		z.object({ type: z.literal("forward") }),
+	]),
+	function: (data) => {
+		if (data.type === "push") {
+			history.pushState({}, "", data.url);
+		} else if (data.type === "replace")	{
+		history.replaceState({}, "", data.url);
+	} else if (data.type === "back" ){
+		history.back();
+	} else if (data.type === "forward") {
+	history.forward();
+	} else if (data.type === "reload") {
+		sendRouteUpdate();
 	}
-})
+
+	},
+});
 
 socket.onmessage = async (event) => {
 	const json = JSON.parse(await (event.data as Blob).text());
@@ -119,14 +146,61 @@ socket.onopen = () => {
 	socket.send(
 		JSON.stringify({
 			type: "request",
-			data: {
-				url: document.location.pathname,
-				query: new URLSearchParams(document.location.search),
-				hash: document.location.hash.slice(1),
-			},
+			data: getUrlData(),
 		})
 	);
 };
 
 // @ts-expect-error Assigning value
 window.socket = socket;
+
+// --- Router Implementation ---
+function getUrlData() {
+	return {
+		url: document.location.pathname,
+		query: Object.fromEntries(
+			new URLSearchParams(document.location.search)
+		),
+		hash: document.location.hash.slice(1),
+	};
+}
+
+function sendRouteUpdate() {
+	socket.send(
+		JSON.stringify({
+			type: "request",
+			data: getUrlData(),
+		})
+	);
+}
+
+// Monkey-patch pushState and replaceState to notify server
+(function () {
+	const origPushState = history.pushState;
+	const origReplaceState = history.replaceState;
+
+	history.pushState = function (...args) {
+		origPushState.apply(this, args);
+		sendRouteUpdate();
+		window.dispatchEvent(new Event("bw:navigate"));
+	};
+	history.replaceState = function (...args) {
+		origReplaceState.apply(this, args);
+		sendRouteUpdate();
+		window.dispatchEvent(new Event("bw:navigate"));
+	};
+
+	window.addEventListener("popstate", () => {
+		sendRouteUpdate();
+		window.dispatchEvent(new Event("bw:navigate"));
+	});
+})();
+
+// Expose router methods
+export const router = {
+
+};
+
+// Optionally, attach router to window for debugging
+// @ts-expect-error
+window.bwRouter = router;

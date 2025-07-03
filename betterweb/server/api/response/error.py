@@ -1,8 +1,9 @@
 from .constructor import ResponseConstructor
 from ..types import Request, sendType
+from .utils import Headers
 
 class APIError:
-  def __init__(self, send: sendType, status: int, statusText: str, data: str, headers: dict[bytes, bytes]):
+  def __init__(self, send: sendType, status: int, statusText: str, data: str, headers: Headers):
     self.send = send
     self.status = status
     self.statusText = statusText
@@ -17,6 +18,6 @@ class APIError:
     })
 
 def methodNotAllowed(send: sendType, allowed: list[str]):
-  return APIError(send, 405, "Method Not Allowed", "Method Not Allowed", {
-    b"Allow": ", ".join(allowed).encode(),
-  })
+  return APIError(send, 405, "Method Not Allowed", "Method Not Allowed", Headers(
+    Allow= ", ".join(allowed).encode()
+  ))

@@ -17,6 +17,7 @@ class Response:
     ):
         self._body = body
         self._options = options
+        self._constructor = constructor
         self._url = constructor["url"]
         self._redirect = constructor["redirect"]
         self._type = constructor["type"]
@@ -69,16 +70,13 @@ class Response:
         self._cookies
 
     def json(self):
-        return ms.json.decode(self._body)
+        return ms.json.decode(self._body) # type: ignore
 
     def arrayBuffer(self):
         pass
 
-    def blob(self):
-        pass
-
     def clone(self):
-        pass
+        return Response(self._body, self._options, self._constructor)
 
     def formData(self):
         pass

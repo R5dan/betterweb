@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "datetime>=5.5",
     "msgspec>=0.19.0",
     "uvicorn[standard]>=0.35.0",
 ]

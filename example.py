@@ -77,11 +77,11 @@ async def ws(ws: Websocket):
 
 app = App(
     api_routes={
-        "/get": APIRoute("/get", ["GET"], get),
-        "/post": APIRoute("/post", ["POST"], post),
-        "/stream": APIRoute("/stream", ["GET"], stream),
+        "/get": APIRoute(["GET"], get),
+        "/post": APIRoute(["POST"], post),
+        "/stream": APIRoute(["GET"], stream),
     },
-    websocket_routes={"/ws": WSRoute("/ws", ws)},
+    websocket_routes={"/ws": WSRoute(ws)},
     routes={"/": Route("/", page)},
     static_routes={
         #        "/static": StaticRoute.from_file("static/index.html", "text/html")

@@ -1,2 +1,2 @@
-from .server import APIRoute, App, Response, Request, ResponseConstructor, methodNotAllowed, StreamResponse, WSRoute, Websocket, Route, DOM, StaticRoute, use_state, use_memo
-from .client import Console
+from .server import APIRoute, App, Response, Request, ResponseConstructor, methodNotAllowed, StreamResponse, WSRoute, Websocket, Route, DOM, StaticRoute, use_state, use_memo, Request
+from .client import Console, LocalStorage

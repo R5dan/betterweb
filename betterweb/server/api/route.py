@@ -10,15 +10,14 @@ from .types import (
 from .response.constructor import ResponseConstructor
 from .response.error import methodNotAllowed
 from ..dom import DOMNode, DOM
+from .response.utils import Headers, Cookie
 
 class APIRoute:
     def __init__(
         self,
-        path: str,
         methods: list[str],
         handler: t.Callable[[Request, ResponseConstructor], t.Awaitable[None]],
     ):
-        self.path = path
         self.methods = methods
         self.handler = handler
 
@@ -30,7 +29,7 @@ class APIRoute:
         response = ResponseConstructor(
             send,
             {
-                "url": request.url.path,
+                "url": request.url,
                 "redirect": False,
                 "type": "basic",
                 "cookies": request.cookies,
@@ -57,13 +56,14 @@ class Websocket:
     async def accept(
         self,
         subprotocol: t.Optional[str] = None,
-        headers: t.Optional[list[tuple[bytes, bytes]]] = None,
+        headers: t.Optional[Headers] = None,
+        cookies: 't.Optional[list[Cookie]]' = None,
     ):
         await self._send(
             {
                 "type": "websocket.accept",
                 "subprotocol": subprotocol,
-                "headers": headers or [],
+                "headers": Headers((headers or []), Cookie=str(Cookie.to_dict(cookies or []))),
             }
         )
 
@@ -88,7 +88,7 @@ class Websocket:
         assert not (
             bytes is not None and text is not None
         ), "You cannot provide both 'bytes' and 'text'"
-        await self._send({"type": "websocket.send", "bytes": bytes, "text": text})
+        await self._send({"type": "websocket.send", "bytes": bytes, "text": text}) # type: ignore[arg-type]
 
     async def close(self, code: int = 1000, reason: t.Optional[str] = None):
         await self._send({"type": "websocket.close", "code": code, "reason": reason})
@@ -105,9 +105,8 @@ class Websocket:
 
 class WSRoute:
     def __init__(
-        self, path: str, handler: t.Callable[[Websocket], t.Awaitable[None]], close=True
+        self, handler: t.Callable[[Websocket], t.Awaitable[None]], close=True
     ):
-        self.path = path
         self.handler = handler
         self.close = close
 

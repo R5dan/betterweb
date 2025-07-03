@@ -1,8 +1,9 @@
 import uvicorn
 from uvicorn._types import Scope, ASGIReceiveCallable, ASGISendCallable
 import typing as t
-from .api import APIRoute, WSRoute, Route, StaticRoute
+from .api import APIRoute, WSRoute, Route, StaticRoute, Request
 from .predefined.ws import WebsocketHandler
+from .router import Router
 
 def read(path: str):
     with open(path, "rb") as f:
@@ -41,7 +42,7 @@ class App:
             ),
         }
         DEFAULT_WEBSOCKET_ROUTES = {
-            "/ws": WSRoute("/ws", WebsocketHandler.init, close=False)
+            "/ws": WSRoute(WebsocketHandler.init, close=False)
         }
 
         for path, route in DEFAULT_STATIC_ROUTES.items():
@@ -49,6 +50,29 @@ class App:
 
         for path, route in DEFAULT_WEBSOCKET_ROUTES.items():
             self.websockets[f"{DEFAULT_ROUTE_PREFIX}{path}"] = route
+
+    def add_router(self, router: "Router", prefix: str):
+        self.api_routes.update(
+            {
+                f"{prefix}{path}": route
+                for path, route in router.api_routes.items()
+            }
+        )
+        self.websockets.update(
+            {
+                f"{prefix}{path}": route
+                for path, route in router.websockets.items()
+            }
+        )
+        self.routes.update(
+            {f"{prefix}{path}": route for path, route in router.routes.items()}
+        )
+        self.static_routes.update(
+            {
+                f"{prefix}{path}": route
+                for path, route in router.static_routes.items()
+            }
+        )
 
     async def __call__(
         self, scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable
@@ -68,7 +92,7 @@ class App:
 
         elif scope["type"] == "http":
             if scope["path"] in self.api_routes:
-                request = Request(scope, receive, send)
+                request = Request(scope, receive) # type: ignore[arg-type]
                 await self.api_routes[scope["path"]](request, send)
                 return
             elif scope["path"] in self.static_routes:

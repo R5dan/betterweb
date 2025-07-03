@@ -52,10 +52,32 @@ class LocalStorage(t.TypedDict):
     type: t.Literal["ls"]
     data: t.Union[LocalStorageType[t.Literal["get"]], LocalStorageSet]
 
-PROCESSES = t.Union[Console, ConsoleClear, HTML, LocalStorage]
+class PushBody(t.TypedDict):
+    type: t.Literal["push"]
+    url: str
+
+class ReplaceBody(t.TypedDict):
+    type: t.Literal["replace"]
+    url: str
+
+class ReloadBody(t.TypedDict):
+    type: t.Literal["reload"]
+
+class BackBody(t.TypedDict):
+    type: t.Literal["back"]
+
+class ForwardBody(t.TypedDict):
+    type: t.Literal["forward"]
+
+class Router(t.TypedDict):
+    type: t.Literal["router"]
+    data: t.Union[PushBody, ReplaceBody, ReloadBody, BackBody, ForwardBody]
+
+
+PROCESSES = t.Union[Console, ConsoleClear, HTML, LocalStorage, Router]
 
 class WebsocketHandler:
-    websocket: Websocket = None
+    websocket: Websocket = None # type: ignore[assignment]
 
     loc: str
     query: dict[str, str]
@@ -100,7 +122,7 @@ class WebsocketHandler:
                 cls.dirty = False
 
             msg = await cls.websocket.receive()
-            data = ms.json.decode(msg["text"])
+            data = ms.json.decode(msg["text"]) # type: ignore[assignment]
 
             handler = DOM.events[data["data"]["id"]][data["data"]["event"]]
             if io.iscoroutinefunction(handler):
