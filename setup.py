@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 DESCRIPTION = "A pythonic version of React, allows for making full stack web apps"
 
 def read(path):
