@@ -6,36 +6,24 @@ T = t.TypeVar("T")
 
 
 class Router:
-    ws: WebsocketHandler
+    ws = WebsocketHandler()
 
     @classmethod
     async def push(cls, url: str):
-        await cls.ws.send({"type": "router", "data": {
-            "type": "push",
-            "url": url
-        }})
+        await cls.ws.send({"type": "router", "data": {"type": "push", "url": url}})
 
     @classmethod
     async def replace(cls, url: str):
-        await cls.ws.send({"type": "router", "data": {
-            "type": "replace",
-            "url": url
-        }})
+        await cls.ws.send({"type": "router", "data": {"type": "replace", "url": url}})
 
     @classmethod
     async def reload(cls):
-        await cls.ws.send({"type": "router", "data": {
-            "type": "reload"
-        }})
+        await cls.ws.send({"type": "router", "data": {"type": "reload"}})
 
     @classmethod
     async def back(cls):
-        await cls.ws.send({"type": "router", "data": {
-            "type": "back"
-        }})
+        await cls.ws.send({"type": "router", "data": {"type": "back"}})
 
     @classmethod
     async def forward(cls):
-        await cls.ws.send({"type": "router", "data": {
-            "type": "forward"
-        }})
+        await cls.ws.send({"type": "router", "data": {"type": "forward"}})

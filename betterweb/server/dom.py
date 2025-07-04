@@ -5,7 +5,7 @@ from collections import defaultdict
 class DOMNode(t.TypedDict):
     tag: str
     properties: dict
-    children: list["DOMNode| str"]
+    children: t.Iterable["DOMNode| str"]
 
 
 class DOM:
@@ -15,7 +15,7 @@ class DOM:
 
     @classmethod
     def create(
-        cls, tag: str, properies: dict, children: list["DOMNode |str"]
+        cls, tag: str, properies: dict, children: t.Iterable["DOMNode |str"]
     ) -> "DOMNode":
         id = f"dom-{cls.id}"
         properies["id"] = id

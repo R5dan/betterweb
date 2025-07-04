@@ -1,4 +1,3 @@
-from ..predefined.ws import WebsocketHandler
 import typing as t
 
 T = t.TypeVar("T")
@@ -11,7 +10,16 @@ class State(t.Generic[T, I]):
     def __init__(self, initial: I):
         self.data = initial
         self.new = initial
-        self.ws = WebsocketHandler
+        # Use lazy import to avoid circular dependency
+        self._ws = None
+
+    @property
+    def ws(self):
+        if self._ws is None:
+            from ..predefined.ws import WebsocketHandler
+
+            self._ws = WebsocketHandler
+        return self._ws
 
     @classmethod
     def create(cls, name: str, initial: I):

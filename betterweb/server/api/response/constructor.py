@@ -1,23 +1,26 @@
 import typing as t
 import msgspec as ms
-from ..types import sendType, ConstructorOptions, OPTIONS
+
+if t.TYPE_CHECKING:
+    from ..types import sendType, ConstructorOptions, OPTIONS
 from .stream import StreamResponse
 from .response import Response
 from datetime import datetime
 from .utils import Headers, Cookie
 
+
 class ResponseConstructor:
     def __init__(
         self,
-        send: sendType,
-        options: ConstructorOptions,
+        send: "sendType",
+        options: "ConstructorOptions",
     ):
         self.send = send
         self.options = options
         self.cookies = []
 
     async def __call__(
-        self, body: t.Optional[bytes] = None, options: t.Optional[OPTIONS] = None
+        self, body: t.Optional[bytes] = None, options: t.Optional["OPTIONS"] = None
     ):
         options = options or {
             "status": 200,
@@ -85,10 +88,10 @@ class ResponseConstructor:
             {"type": "http.response.start", "status": status, "headers": headers}
         )
 
-    async def json(self, data: dict, options: t.Optional[OPTIONS] = None):
+    async def json(self, data: dict, options: t.Optional["OPTIONS"] = None):
         json = ms.json.encode(data)
 
-        options = options or {"status": 200, "headers": Headers(), "statusText": ""} 
+        options = options or {"status": 200, "headers": Headers(), "statusText": ""}
 
         await self.start(
             options["status"],
@@ -104,5 +107,5 @@ class ResponseConstructor:
 
         return Response(json, options, self.options)
 
-    async def stream(self, options: t.Optional[OPTIONS] = None):
+    async def stream(self, options: t.Optional["OPTIONS"] = None):
         return await StreamResponse.init(self.send, options)

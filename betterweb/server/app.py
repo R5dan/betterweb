@@ -19,6 +19,9 @@ class App:
         websocket_routes: "dict[str, WSRoute]",
         routes: "dict[str, Route]",
         static_routes: "dict[str, StaticRoute]",
+        errors: "t.Optional[dict[int, Route]]" = None,
+        loading: "t.Optional[Route]" = None,
+
         on_startup: t.Callable[[], None] | None = None,
         on_shutdown: t.Callable[[], None] | None = None,
     ):
@@ -26,6 +29,8 @@ class App:
         self.websockets = websocket_routes
         self.routes = routes
         self.static_routes = static_routes
+        self.errors = errors or {}
+        self.loading = loading
 
         self.on_startup = on_startup
         self.on_shutdown = on_shutdown
@@ -92,6 +97,16 @@ class App:
 
         elif scope["type"] == "http":
             if scope["path"] in self.api_routes:
+                route = self.api_routes[scope["path"]]
+
+                if scope["method"] not in route.methods:
+                    await send(
+                        {
+                            "type": "http.response.start",
+                            "status": 405,
+                            "headers": [(b"allow", ",".join(route.methods).encode())],
+                        }
+                    )
                 request = Request(scope, receive) # type: ignore[arg-type]
                 await self.api_routes[scope["path"]](request, send)
                 return
@@ -116,9 +131,10 @@ class App:
         else:
             return
 
-    def run(self, host="127.0.0.1", port=8000):
+    def run(self, host="127.0.0.1", port=8000, reload=False):
         uvicorn.run(
             self,
             host=host,
             port=port,
+            reload=reload,
         )

@@ -8,9 +8,11 @@ from betterweb import (
     Console,
     DOM,
     StaticRoute,
+    RouteError,
     Request,
     use_state,
     use_memo,
+    Headers,
 )
 import time
 import asyncio
@@ -33,6 +35,10 @@ async def stream(request: Request, response: ResponseConstructor):
     print("Closing")
     await stream.close()
 
+def on_click():
+    print("CLICK")
+    RouteError(404, "Not Found", Headers()).throw()
+
 
 async def page():
     async def client():
@@ -40,7 +46,7 @@ async def page():
 
         def complex_func():
             print("COMPLEX")
-            time.sleep(10)
+            #time.sleep(10)
 
         count, setCount = use_state("counter", 0)
         use_memo(complex_func, [count])
@@ -49,16 +55,11 @@ async def page():
             {},
             [
                 DOM.create(
-                    "h1",
-                    {},
-                    [
-                        f"Counter: {count}",
-                        DOM.create(
-                            "button",
-                            {"onclick": lambda: setCount(count + 1)},
-                            ["Click Me"],
-                        ),
-                    ],
+                    "Error",
+                    {
+                        "onclick": on_click
+                    },
+                    ["Click Me"],
                 ),
             ],
         )
@@ -85,6 +86,7 @@ app = App(
     routes={"/": Route("/", page)},
     static_routes={
         #        "/static": StaticRoute.from_file("static/index.html", "text/html")
+        #        "/client/client.js": StaticRoute.from_file("path/to/file.js", "application/javascript")
     },
 )
 

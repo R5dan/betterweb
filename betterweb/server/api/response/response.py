@@ -1,6 +1,9 @@
 import typing as t
 import msgspec as ms
-from ..types import ConstructorOptions, OPTIONS
+
+
+if t.TYPE_CHECKING:
+    from ..types import ConstructorOptions, OPTIONS
 
 class Response:
     """
@@ -12,8 +15,8 @@ class Response:
     def __init__(
         self,
         body: t.Optional[bytes],
-        options: OPTIONS,
-        constructor: ConstructorOptions,
+        options: 'OPTIONS',
+        constructor: 'ConstructorOptions',
     ):
         self._body = body
         self._options = options
