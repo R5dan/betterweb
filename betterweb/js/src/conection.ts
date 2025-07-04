@@ -113,25 +113,44 @@ processes.add({
 processes.add({
 	type: "router",
 	data: z.union([
-		z.object({ type: z.literal("push"), url: z.string() }),
-		z.object({ type: z.literal("replace"), url: z.string() }),
-		z.object({ type: z.literal("reload") }),
-		z.object({ type: z.literal("back"), }),
+		z.object({
+			type: z.literal("push"),
+			url: z.string(),
+			client: z.boolean(),
+		}),
+		z.object({
+			type: z.literal("replace"),
+			url: z.string(),
+			client: z.boolean(),
+		}),
+		z.object({ type: z.literal("reload"), client: z.boolean() }),
+		z.object({ type: z.literal("back") }),
 		z.object({ type: z.literal("forward") }),
 	]),
 	function: (data) => {
 		if (data.type === "push") {
-			history.pushState({}, "", data.url);
-		} else if (data.type === "replace")	{
-		history.replaceState({}, "", data.url);
-	} else if (data.type === "back" ){
-		history.back();
-	} else if (data.type === "forward") {
-	history.forward();
-	} else if (data.type === "reload") {
-		sendRouteUpdate();
-	}
-
+			if (data.client) {
+				history.pushState({}, "", data.url);
+			} else {
+				window.location.href = data.url;
+			}
+		} else if (data.type === "replace") {
+			if (data.client) {
+				history.replaceState({}, "", data.url);
+			} else {
+				window.location.replace(data.url);
+			}
+		} else if (data.type === "back") {
+			history.back();
+		} else if (data.type === "forward") {
+			history.forward();
+		} else if (data.type === "reload") {
+			if (data.client) {
+				sendRouteUpdate();
+			} else {
+				window.location.reload();
+			}
+		}
 	},
 });
 
@@ -197,9 +216,7 @@ function sendRouteUpdate() {
 })();
 
 // Expose router methods
-export const router = {
-
-};
+export const router = {};
 
 // Optionally, attach router to window for debugging
 // @ts-expect-error

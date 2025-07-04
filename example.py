@@ -13,6 +13,7 @@ from betterweb import (
     use_state,
     use_memo,
     Headers,
+    Router
 )
 import time
 import asyncio
@@ -35,9 +36,9 @@ async def stream(request: Request, response: ResponseConstructor):
     print("Closing")
     await stream.close()
 
-def on_click():
+async def on_click():
     print("CLICK")
-    RouteError(404, "Not Found", Headers()).throw()
+    await Router.push("/get")
 
 
 async def page():

@@ -58,16 +58,16 @@ class LocalStorage(t.TypedDict):
 class PushBody(t.TypedDict):
     type: t.Literal["push"]
     url: str
-
+    client: bool
 
 class ReplaceBody(t.TypedDict):
     type: t.Literal["replace"]
     url: str
-
+    client: bool
 
 class ReloadBody(t.TypedDict):
     type: t.Literal["reload"]
-
+    client: bool
 
 class BackBody(t.TypedDict):
     type: t.Literal["back"]
